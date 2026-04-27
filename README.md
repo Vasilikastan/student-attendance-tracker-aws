@@ -29,9 +29,8 @@ This is a **serverless Student Attendance Tracking System** deployed on AWS clou
 | **Frontend (S3)** | `http://YOUR-BUCKET.s3-website-us-east-1.amazonaws.com` |
 | **GitHub Repository** | `https://github.com/Vasilikastan/student-attendance-tracker-aws.git` |
 
-> ⚠️ **Note:** Replace URLs above with your actual deployment URLs.
 
----
+
 
 ## 📐 Architecture
 
@@ -64,7 +63,7 @@ Before deploying, ensure you have:
 | Postman | Latest | API testing |
 | VS Code | Latest | Code editing |
 
----
+
 
 ## 📦 Deployment Instructions
 
