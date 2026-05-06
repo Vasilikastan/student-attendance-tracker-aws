@@ -1,89 +1,183 @@
-# 📚 Student Attendance Tracker - AWS Cloud-Native Application
+# Student Attendance Tracker
 
-![AWS](https://img.shields.io/badge/AWS-Lambda%20%7C%20DynamoDB%20%7C%20API%20Gateway%20%7C%20S3-orange)
-![Python](https://img.shields.io/badge/Python-3.11-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
+## Project Overview
 
-## 🎯 Project Overview
+Student Attendance Tracker is a cloud-based web application used to add, view, update and delete student attendance records.
 
-This is a **serverless Student Attendance Tracking System** deployed on AWS cloud-native services. The application enables instructors to mark student attendance (present/absent/late/excused), view attendance history, generate reports, and manage records through a RESTful API. Parents receive automated email notifications when a student is marked absent or late.
+The application uses a static frontend hosted on Amazon S3 and a serverless backend using API Gateway, AWS Lambda and DynamoDB.
 
-### 🏫 Use Case
-- **Course:** SWE5308 Cloud Technologies
-- **Assessment:** Part 2 - Portfolio Coursework (60%)
-- **Institution:** University of Bolton / Regent College
-- **Submission Date:** 8th May 2026
+## Live Application
 
-### 👤 Author
-- **Student ID:** Vasile.HE27436
-- **Module:** SWE5308 Cloud Technologies
-- **Tutor:** Richard Paul, Md Aminul Islam
+Live website:
 
----
+http://att-tracker-12345678.s3-website-us-east-1.amazonaws.com
 
-## 🚀 Live Demo
+## API Endpoint
 
-| Component | URL |
-|-----------|-----|
-| **API Gateway** | `https://YOUR-API-ID.execute-api.us-east-1.amazonaws.com/prod/attendance` |
-| **Frontend (S3)** | `http://YOUR-BUCKET.s3-website-us-east-1.amazonaws.com` |
-| **GitHub Repository** | `https://github.com/Vasilikastan/student-attendance-tracker-aws.git` |
+https://ppzsd3j7d1.execute-api.us-east-1.amazonaws.com/default/records
 
+## AWS Services Used
 
+| AWS Service | Purpose |
+|---|---|
+| Amazon S3 | Hosts the static frontend website |
+| API Gateway | Provides the public HTTP API endpoint |
+| AWS Lambda | Runs the backend CRUD logic |
+| DynamoDB | Stores student attendance records |
+| IAM | Manages access permissions |
+| CloudWatch | Stores Lambda logs for monitoring |
 
+## Main Features
 
-## 📐 Architecture
+- Add student attendance records
+- Load and display attendance records
+- Update attendance status
+- Delete attendance records
+- Store data in DynamoDB
+- Monitor backend activity using CloudWatch logs
 
+## Architecture Summary
 
+The user accesses the frontend through an Amazon S3 static website endpoint. The frontend sends requests to API Gateway. API Gateway invokes an AWS Lambda function. Lambda performs CRUD operations on the DynamoDB table.
 
-### AWS Services Used
+```text
+User Browser
+   ↓
+Amazon S3 Static Website
+   ↓
+API Gateway
+   ↓
+AWS Lambda
+   ↓
+DynamoDB
+```
 
-| Service | Purpose |
-|---------|---------|
-| **AWS Lambda** | Serverless compute for CRUD operations (4 functions) |
-| **Amazon DynamoDB** | NoSQL database with encryption and TTL |
-| **API Gateway** | RESTful API endpoints with CORS |
-| **Amazon S3** | Static website hosting for frontend |
-| **AWS IAM** | Least privilege access control |
-| **CloudWatch** | Monitoring, metrics, and dashboards |
-| **Amazon SES** | Email notifications for absences/late arrivals |
+CloudWatch is used for logging and monitoring. IAM controls the Lambda function permissions.
 
----
+## Project Structure
 
-## 🔧 Prerequisites
+```text
+student-attendance-tracker/
+├── architecture/
+│   └── architecture-diagram.png
+├── backend/
+│   └── lambda_function.py
+├── frontend/
+│   ├── index.html
+│   ├── style.css
+│   └── script.js
+├── screenshots/
+└── README.md
+```
 
-Before deploying, ensure you have:
+## DynamoDB Table
 
-| Tool | Version | Purpose |
-|------|---------|---------|
-| AWS Account | Free Tier | Hosting infrastructure |
-| Python | 3.11+ | Lambda runtime |
-| AWS CLI | Latest | Deployment automation |
-| Git | Latest | Version control |
-| Postman | Latest | API testing |
-| VS Code | Latest | Code editing |
+Table name:
 
+```text
+StudentAttendance
+```
 
+Primary key design:
 
-## 📦 Deployment Instructions
+| Key | Field |
+|---|---|
+| Partition key | studentId |
+| Sort key | attendanceDate |
 
-### Option 1: CloudFormation (Recommended)
+Main attributes:
 
-```bash
-# Clone the repository
-git clone https://github.com/YOUR_USERNAME/student-attendance-tracker-aws.git
-cd student-attendance-tracker-aws
+- studentId
+- studentName
+- course
+- attendanceDate
+- status
+- createdAt
+- updatedAt
 
-# Deploy CloudFormation stack
-aws cloudformation create-stack \
-  --stack-name attendance-tracker \
-  --template-body file://infrastructure/cloudformation-template.yaml \
-  --capabilities CAPABILITY_IAM
+## API Behaviour
 
-# Wait for deployment (5-10 minutes)
-aws cloudformation wait stack-create-complete --stack-name attendance-tracker
+| Method | Purpose |
+|---|---|
+| GET | Retrieve attendance records |
+| POST | Add a new attendance record |
+| POST with action update | Update an attendance record |
+| POST with action delete | Delete an attendance record |
 
-# Get outputs (API URL, Frontend URL)
-aws cloudformation describe-stacks \
-  --stack-name attendance-tracker \
-  --query "Stacks[0].Outputs"
+Update and delete use POST requests with an `action` field to avoid browser CORS issues with PUT and DELETE during frontend testing.
+
+## Example JSON Requests
+
+### Add record
+
+```json
+{
+  "studentId": "S001",
+  "studentName": "Example Student",
+  "course": "Cloud Technologies",
+  "attendanceDate": "2026-05-01",
+  "status": "Present"
+}
+```
+
+### Update record
+
+```json
+{
+  "action": "update",
+  "studentId": "S001",
+  "attendanceDate": "2026-05-01",
+  "status": "Absent"
+}
+```
+
+### Delete record
+
+```json
+{
+  "action": "delete",
+  "studentId": "S001",
+  "attendanceDate": "2026-05-01"
+}
+```
+
+## Testing Summary
+
+| Test | Expected Result | Status |
+|---|---|---|
+| Load records | Records are displayed on the frontend | Passed |
+| Add record | New record is stored in DynamoDB | Passed |
+| Update record | Attendance status is updated | Passed |
+| Delete record | Record is removed from DynamoDB | Passed |
+| CloudWatch logs | Lambda invocations are recorded | Passed |
+
+## Security Notes
+
+- Lambda uses an IAM execution role.
+- DynamoDB access is controlled through IAM permissions.
+- No AWS access keys are stored in frontend code.
+- API Gateway is used as the public API access layer.
+- CloudWatch logs are used for monitoring and troubleshooting.
+
+## Deployment Summary
+
+The frontend was deployed to Amazon S3 using static website hosting. The backend was deployed using AWS Lambda. API Gateway was configured to connect the frontend to Lambda, and DynamoDB was used as the database layer.
+
+## Evidence
+
+Screenshots are stored in the `screenshots/` folder and include evidence of:
+
+- Architecture diagram
+- DynamoDB table and records
+- Lambda function and test results
+- IAM permissions
+- API Gateway routes and CORS
+- S3 static website hosting
+- Live CRUD testing
+- CloudWatch logs
+
+## Author
+
+Student No: HE27436  
+Module: SWE5308 Cloud Technologies  
+Assessment: Assessment 2 Portfolio Coursework
